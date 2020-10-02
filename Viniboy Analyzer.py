@@ -41,19 +41,28 @@ def processaDados(linha, cantos):
 		else:
 			push = push + 1
 			
-	return (media, over, under, push)
+	return (media, over, under, push, total)
 	
 
 def verificaTendencia(linha, cantos_casa, cantos_fora):
-	media_casa, over_casa, under_casa, push_casa = processaDados(linha, cantos_casa)
-	media_fora, over_fora, under_fora, push_fora = processaDados(linha, cantos_fora)
+	media_casa, over_casa, under_casa, push_casa, total_casa = processaDados(linha, cantos_casa)
+	media_fora, over_fora, under_fora, push_fora, total_fora = processaDados(linha, cantos_fora)
 	
 	if media_casa > linha and media_fora > linha:
 		if over_casa > under_casa and over_fora > under_fora:
-			return "Over"
+			c1 = (over_casa + over_fora) / (len(cantos_casa) + len(cantos_fora)) >= 0.6
+			c2 = (over_casa / len(cantos_casa) >= 0.7) or (over_fora / len(cantos_fora) >= 0.7)
+			c3 = (under_casa / len(cantos_casa) <= 0.3) and (under_fora / len(cantos_fora) <= 0.3)
+			if c1 or c2 or c3:
+				return "Over"
+				
 	elif media_casa < linha and media_fora < linha:
 		if under_casa > over_casa and under_fora > over_fora:
-			return "Under"
+			c1 = (under_casa + under_fora) / (len(cantos_casa) + len(cantos_fora)) >= 0.6
+			c2 = (under_casa / len(cantos_casa) >= 0.7) or (under_fora / len(cantos_fora) >= 0.7)
+			c3 = (over_casa / len(cantos_casa) <= 0.3) and (over_fora / len(cantos_fora) <= 0.3)
+			if c1 or c2 or c3:
+				return "Under"
 	
 	return "Nenhum"
 	
@@ -62,25 +71,32 @@ def imprimeRelatorio(jogo, linha, cantos_casa, cantos_fora):
 	# Faz a impressão formatada dos dados na tela do terminal ao final
 	# do processamento de cada jogo
 	
-	media_casa, over_casa, under_casa, push_casa = processaDados(linha, cantos_casa)
-	media_fora, over_fora, under_fora, push_fora = processaDados(linha, cantos_fora)
+	media_casa, over_casa, under_casa, push_casa, total_casa = processaDados(linha, cantos_casa)
+	media_fora, over_fora, under_fora, push_fora, total_fora = processaDados(linha, cantos_fora)
 	
 	print("\nJogo: " + jogo)
 	print("Linha: %.1f" % linha)
 	
 	print("\nTime mandante: ")
 	print("Média cantos/jogo: {:.2f}".format(media_casa))
-	print("Over {}: {}/{}".format(linha, over_casa, len(cantos_casa)))
-	print("Under {}: {}/{}".format(linha, under_casa, len(cantos_casa)))
+	print("Over {}: {}/{} ({:.1f}%)".format(linha, over_casa, len(cantos_casa), (over_casa/len(cantos_casa))*100))
+	print("Under {}: {}/{} ({:.1f}%)".format(linha, under_casa, len(cantos_casa), (under_casa/len(cantos_casa))*100))
 	if ehInteiro(linha):
-		print("Push {}: {}/{}".format(linha, push_casa, len(cantos_casa)))
+		print("Push {}: {}/{} ({:.1f}%)".format(linha, push_casa, len(cantos_casa), (push_casa/len(cantos_casa))*100))
 	
 	print("\nTime visitante: ")
 	print("Média cantos/jogo: {:.2f}".format(media_fora))
-	print("Over {}: {}/{}".format(linha, over_fora, len(cantos_fora)))
-	print("Under {}: {}/{}".format(linha, under_fora, len(cantos_fora)))
+	print("Over {}: {}/{} ({:.1f}%)".format(linha, over_fora, len(cantos_fora), (over_fora/len(cantos_fora))*100))
+	print("Under {}: {}/{} ({:.1f}%)".format(linha, under_fora, len(cantos_fora), (under_fora/len(cantos_fora))*100))
 	if ehInteiro(linha):
-		print("Push {}: {}/{}\n".format(linha, push_fora, len(cantos_fora)))
+		print("Push {}: {}/{} ({:.1f}%)\n".format(linha, push_fora, len(cantos_fora), (push_fora/len(cantos_fora))*100))
+	
+	print("\nAmbos times: ")
+	print("Média cantos/jogo: {:.2f}".format((total_casa + total_fora) / (len(cantos_casa) + len(cantos_fora))))
+	print("Over {}: {}/{} ({:.1f}%)".format(linha, over_casa + over_fora, len(cantos_casa) + len(cantos_fora), ((over_casa + over_fora) / (len(cantos_casa) + len(cantos_fora)))*100))
+	print("Under {}: {}/{} ({:.1f}%)".format(linha, under_casa + under_fora, len(cantos_casa) + len(cantos_fora), ((under_casa + under_fora) / (len(cantos_casa) + len(cantos_fora)))*100))
+	if ehInteiro(linha):
+		print("Push {}: {}/{} ({:.1f}%)".format(linha, push_casa + push_fora, len(cantos_casa) + len(cantos_fora), ((push_casa + push_fora) / (len(cantos_casa) + len(cantos_fora)))*100))
 	else:
 		print()
 	
@@ -88,8 +104,8 @@ def imprimeRelatorio(jogo, linha, cantos_casa, cantos_fora):
 def salvaRelatorio(jogo, linha, cantos_casa, cantos_fora):
 	# Salva o relatório de cada jogo no arquivo .txt indicado
 	
-	media_casa, over_casa, under_casa, push_casa = processaDados(linha, cantos_casa)
-	media_fora, over_fora, under_fora, push_fora = processaDados(linha, cantos_fora)
+	media_casa, over_casa, under_casa, push_casa, total_casa = processaDados(linha, cantos_casa)
+	media_fora, over_fora, under_fora, push_fora, total_fora = processaDados(linha, cantos_fora)
 	
 	tendencia = verificaTendencia(linha, cantos_casa, cantos_fora)
 	
@@ -103,17 +119,24 @@ def salvaRelatorio(jogo, linha, cantos_casa, cantos_fora):
 	
 	arq.write("\n\nTime mandante: ")
 	arq.write("\nMédia cantos/jogo: {:.2f}".format(media_casa))
-	arq.write("\nOver {}: {}/{}".format(linha, over_casa, len(cantos_casa)))
-	arq.write("\nUnder {}: {}/{}".format(linha, under_casa, len(cantos_casa)))
+	arq.write("\nOver {}: {}/{} ({:.1f}%)".format(linha, over_casa, len(cantos_casa), (over_casa/len(cantos_casa))*100))
+	arq.write("\nUnder {}: {}/{} ({:.1f}%)".format(linha, under_casa, len(cantos_casa), (under_casa/len(cantos_casa))*100))
 	if ehInteiro(linha):
-		arq.write("\nPush {}: {}/{}".format(linha, push_casa, len(cantos_casa)))
+		arq.write("\nPush {}: {}/{} ({:.1f}%)".format(linha, push_casa, len(cantos_casa), (push_casa/len(cantos_casa))*100))
 	
 	arq.write("\n\nTime visitante: ")
 	arq.write("\nMédia cantos/jogo: {:.2f}".format(media_fora))
-	arq.write("\nOver {}: {}/{}".format(linha, over_fora, len(cantos_fora)))
-	arq.write("\nUnder {}: {}/{}".format(linha, under_fora, len(cantos_fora)))
+	arq.write("\nOver {}: {}/{} ({:.1f}%)".format(linha, over_fora, len(cantos_fora), (over_fora/len(cantos_fora))*100))
+	arq.write("\nUnder {}: {}/{} ({:.1f}%)".format(linha, under_fora, len(cantos_fora), (under_fora/len(cantos_fora))*100))
 	if ehInteiro(linha):
-		arq.write("\nPush {}: {}/{}\n".format(linha, push_fora, len(cantos_fora)))
+		arq.write("\nPush {}: {}/{} ({:.1f}%)\n".format(linha, push_fora, len(cantos_fora), (push_fora/len(cantos_fora))*100))
+		
+	arq.write("\n\nAmbos times: ")
+	arq.write("\nMédia cantos/jogo: {:.2f}".format((total_casa + total_fora) / (len(cantos_casa) + len(cantos_fora))))
+	arq.write("\nOver {}: {}/{} ({:.1f}%)".format(linha, over_casa + over_fora, len(cantos_casa) + len(cantos_fora), ((over_casa + over_fora) / (len(cantos_casa) + len(cantos_fora)))*100))
+	arq.write("\nUnder {}: {}/{} ({:.1f}%)".format(linha, under_casa + under_fora, len(cantos_casa) + len(cantos_fora), ((under_casa + under_fora) / (len(cantos_casa) + len(cantos_fora)))*100))
+	if ehInteiro(linha):
+		arq.write("\nPush {}: {}/{} ({:.1f}%)".format(linha, push_casa + push_fora, len(cantos_casa) + len(cantos_fora), ((push_casa + push_fora) / (len(cantos_casa) + len(cantos_fora)))*100))
 	else:
 		arq.write("\n")
 
@@ -121,7 +144,7 @@ def salvaRelatorio(jogo, linha, cantos_casa, cantos_fora):
 	arq.close()
 
 def main(args):
-	print("Viniboy Analyzer v1.2\n")
+	print("Viniboy Analyzer v1.3\n")
 	
 	jogo = input("Jogo: ")
 	
