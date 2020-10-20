@@ -198,10 +198,13 @@ def verificaMandante(cantos_casa, linha):
 	
 	media_casa, over_casa, under_casa, push_casa, total_casa = processaDados(linha, cantos_casa)
 	
-	if media_casa > linha and under_casa >= over_casa:
+	if over_casa == under_casa or media_casa == linha:
+		return True
+	
+	if media_casa > linha and under_casa > over_casa:
 		return True
 		
-	elif media_casa < linha and over_casa >= under_casa:
+	elif media_casa < linha and over_casa > under_casa:
 		return True
 	
 	return False
@@ -209,11 +212,11 @@ def verificaMandante(cantos_casa, linha):
 
 def geraWhatsapp(jogo):
 	arq = open("Whatsapp.txt", "a")
-	arq.write(jogo + "\n")
+	arq.write(jogo + " \n")
 
 
 def main(args):
-	print("Viniboy Analyzer v1.4\n")
+	print("Viniboy Analyzer v1.4.1\n")
 	
 	jogo = input("Jogo: ")
 	
